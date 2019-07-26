@@ -23,7 +23,15 @@ const { User } = require("./models/user");
 //---------- Users ----------
 
 app.post("/api/users/register", (req, res) => {
-  res.send(200);
+  const user = new User(req.body);
+
+  user.save((err, doc) => {
+    if (err) return res.json({ success: false, err });
+    res.status(200).json({
+      success: true,
+      userData: doc
+    });
+  });
 });
 
 //---------- end of Users ----------
