@@ -35,6 +35,25 @@ const { admin } = require("./middleware/admin");
 
 //---------- Products ----------
 
+app.get("/api/product/articles_by_id", (req, res) => {
+  const type = req.query.type;
+  let items = req.query.id;
+
+  if (type === "array") {
+    let ids = items.split(",");
+    items = ids.map(item => {
+      return mongoose.Types.ObjectId(item);
+    });
+  }
+
+  Product.find({ _id: { $in: items } })
+    .populate("brand")
+    .populate("wood")
+    .exec((err, docs) => {
+      return res.status(200).send(docs);
+    });
+});
+
 app.post("/api/product/article", auth, admin, (req, res) => {
   const product = new Product(req.body);
 
