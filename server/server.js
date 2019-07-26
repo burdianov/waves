@@ -21,6 +21,7 @@ app.use(cookieParser());
 
 const { User } = require("./models/user");
 const { Brand } = require("./models/brand");
+const { Wood } = require("./models/wood");
 
 //---------- end of models ----------
 
@@ -31,6 +32,20 @@ const { admin } = require("./middleware/admin");
 
 //---------- end of middleware ----------
 
+//---------- Woods ----------
+
+app.post("/api/product/wood", auth, admin, (req, res) => {
+  const wood = new Wood(req.body);
+
+  wood.save((err, doc) => {
+    if (err) return res.json({ success: false, err });
+
+    res.status(200).json({ success: true, wood: doc });
+  });
+});
+
+//---------- end of Woods ----------
+
 //---------- Brands ----------
 
 app.post("/api/product/brand", auth, admin, (req, res) => {
@@ -40,6 +55,14 @@ app.post("/api/product/brand", auth, admin, (req, res) => {
     if (err) return res.json({ success: false, err });
 
     res.status(200).json({ success: true, brand: doc });
+  });
+});
+
+app.get("/api/product/woods", (req, res) => {
+  Wood.find({}, (err, woods) => {
+    if (err) return res.status(400).send(err);
+
+    res.status(200).send(woods);
   });
 });
 
