@@ -2,6 +2,9 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const mongoose = require("mongoose");
+mongoose.set("useNewUrlParser", true);
+mongoose.set("useFindAndModify", false);
+mongoose.set("useCreateIndex", true);
 
 const app = express();
 
@@ -20,7 +23,26 @@ const { User } = require("./models/user");
 
 //---------- end of models ----------
 
+//---------- middleware ----------
+
+const { auth } = require("./middleware/auth");
+
+//---------- end of middleware ----------
+
 //---------- Users ----------
+
+app.get("/api/users/auth", auth, (req, res) => {
+  res.status(200).json({
+    isAdmin: req.user.role === 0 ? false : true,
+    isAuth: true,
+    email: req.user.email,
+    name: req.user.name,
+    lastname: req.user.lastname,
+    role: req.user.role,
+    cart: req.user.cart,
+    history: req.user.history
+  });
+});
 
 app.post("/api/users/register", (req, res) => {
   const user = new User(req.body);
@@ -28,14 +50,12 @@ app.post("/api/users/register", (req, res) => {
   user.save((err, doc) => {
     if (err) return res.json({ success: false, err });
     res.status(200).json({
-      success: true,
-      userData: doc
+      success: true
     });
   });
 });
 
 app.post("/api/users/login", (req, res) => {
-  // find the email
   User.findOne({ email: req.body.email }, (err, user) => {
     if (!user) {
       return res.json({
@@ -61,9 +81,6 @@ app.post("/api/users/login", (req, res) => {
       });
     });
   });
-
-  // check the password
-  // generate a token
 });
 
 //---------- end of Users ----------
